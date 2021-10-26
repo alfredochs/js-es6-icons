@@ -126,7 +126,47 @@ for (let i = 0; i < iconList.length; i++) {
             </div> 
 	`;
 }
-// Milestone 1
+// 4 creo una funzione che mi selezioni il type di ogni oggetto per selezionarli nel select
+function gruppoPerTipo(arrayDiOggetti) {
+	// 5 creo un oggetto vuoto per raggrupare tutti i type disponibili (che in primis possono essere 3 
+	// come in questo caso come possono essere 100)
+	const listaDiGruppi = {};
+	for (let i = 0; i < arrayDiOggetti.length; i++) {
+		// in questo caso mi prendo il type di questo oggetto usando il destructuring 
+		const { type } = arrayDiOggetti[i];
+		// 6 se non esiste il gruppo all'interno della lista dei gruppi vado a creare un altro gruppo
+		if (!listaDiGruppi[type]) {
+			//  6.1 in questa maniera creo un array dentro l'oggetto
+			// sto usando le chiavi dinamiche
+			listaDiGruppi[type] = [];
+		}
+		listaDiGruppi[type].push(arrayDiOggetti[i]);
+	}
+	console.log(listaDiGruppi);
+}
+// gruppoPerTipo(iconList);;
+
+// creo un'altra funzione che mi andrà a stampare le singole categorie
+function StampaSingolaCategoria(lista) {
+	for (let i = 0; i < lista.length; i++) {
+		const iconaSingola = lista[i];
+		const { name, prefix, family, type } = iconaSingola; //oppure di iconList[i]
+		const color = coloriPerFamiglia[type];
+		cardsContainer.innerHTML +=
+			`
+				<div class="card">
+					<div class="card-icon" style="color: ${color}">
+						<i class="${family} ${prefix + name}"></i>
+					</div>
+					<div class="card-text">
+						<h6 style="margin: 10px;">${name}</h6>
+					</div>
+				</div> 
+		`;
+	}
+}
+StampaSingolaCategoria(iconList);
+
 // Partendo dalla seguente struttura dati , mostriamo in pagina tutte le icone disponibili come da layout.
 // Milestone 2
 // Coloriamo le icone per tipo
