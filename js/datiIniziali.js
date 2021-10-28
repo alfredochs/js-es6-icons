@@ -105,27 +105,8 @@ const coloriPerFamiglia =
 };
 
 const cardsContainer = document.querySelector(".cards-container");
+const selectFiltro = document.getElementById("select-filtro");
 
-for (let i = 0; i < iconList.length; i++) {
-	const iconaSingola = iconList[i];
-	// 1 posso utilizzare il destructuring
-	// 2.1 aggiungo anche il type dell'oggetto per capire a quale appartiene
-	const { name, prefix, family, type } = iconaSingola; //oppure di iconList[i]
-	const color = coloriPerFamiglia[type];
-	cardsContainer.innerHTML +=
-		// 1 dentro l'inner anziche scrivere iconaSingola.family 
-		// 1 dopo il destructuring utilizzo soltanto la propietà presa col destructuring
-		`
-			<div class="card">
-                <div class="card-icon" style="color: ${color}">
-                    <i class="${family} ${prefix + name}"></i>
-                </div>
-                <div class="card-text">
-                    <h6 style="margin: 10px;">${name}</h6>
-                </div>
-            </div> 
-	`;
-}
 // 4 creo una funzione che mi selezioni il type di ogni oggetto per selezionarli nel select
 function gruppoPerTipo(arrayDiOggetti) {
 	// 5 creo un oggetto vuoto per raggrupare tutti i type disponibili (che in primis possono essere 3 
@@ -133,26 +114,46 @@ function gruppoPerTipo(arrayDiOggetti) {
 	const listaDiGruppi = {};
 	for (let i = 0; i < arrayDiOggetti.length; i++) {
 		// in questo caso mi prendo il type di questo oggetto usando il destructuring 
-		const { type } = arrayDiOggetti[i];
+		const { type, name, family, prefix } = arrayDiOggetti[i];
 		// 6 se non esiste il gruppo all'interno della lista dei gruppi vado a creare un altro gruppo
 		if (!listaDiGruppi[type]) {
 			//  6.1 in questa maniera creo un array dentro l'oggetto
 			// sto usando le chiavi dinamiche
 			listaDiGruppi[type] = [];
 		}
-		listaDiGruppi[type].push(arrayDiOggetti[i]);
+		// 6.1 non utilizzo l'array originale perchè se mai dovessi modificare un elemento all'interno di quell'array
+		//  andrebbe a cambiare l'oggetto originale, invece facciamo lo spread operator ovvero ...iconList[] per clonarlo
+		// listaDiGruppi[type].push(arrayDiOggetti[i]);
+		listaDiGruppi[type].push({
+			// ...arrayDiOggetti[i] non prendo tutte le chiavi ma solo alcune che mi interessano
+			name,
+			prefix,
+			family,
+			color: coloriPerFamiglia[type]
+		});
 	}
-	console.log(listaDiGruppi);
+	return listaDiGruppi;
 }
-// gruppoPerTipo(iconList);;
+// mi salvo il risultato della funzione con l'array gia incluso
+const iconeRaggrupate = gruppoPerTipo(iconList);
 
-// creo un'altra funzione che mi andrà a stampare le singole categorie
-function StampaSingolaCategoria(lista) {
-	for (let i = 0; i < lista.length; i++) {
-		const iconaSingola = lista[i];
-		const { name, prefix, family, type } = iconaSingola; //oppure di iconList[i]
-		const color = coloriPerFamiglia[type];
+// iconeRaggrupate.animal[0].name = "alfre";
+console.log(iconList);
+console.log(iconeRaggrupate);
+
+
+stampaCategoria(iconeRaggrupate);
+
+function stampaCategoria(categoria) {
+	for (let i = 0; i < categoria.length; i++) {
+		const iconaSingola = categoria[i];
+		// 1 posso utilizzare il destructuring
+		// 2.1 aggiungo anche il type dell'oggetto per capire a quale appartiene
+		const { name, prefix, family, color } = iconaSingola; //oppure di iconList[i]
+		// const color = coloriPerFamiglia[type];
 		cardsContainer.innerHTML +=
+			// 1 dentro l'inner anziche scrivere iconaSingola.family 
+			// 1 dopo il destructuring utilizzo soltanto la propietà presa col destructuring
 			`
 				<div class="card">
 					<div class="card-icon" style="color: ${color}">
@@ -165,10 +166,45 @@ function StampaSingolaCategoria(lista) {
 		`;
 	}
 }
-StampaSingolaCategoria(iconList);
 
-// Partendo dalla seguente struttura dati , mostriamo in pagina tutte le icone disponibili come da layout.
-// Milestone 2
-// Coloriamo le icone per tipo
-// Milestone 3
-// Creiamo una select con i tipi di icone e usiamola per filtrare le icone
+function stampaMultipleCategorie(...daStampare) {
+	cardsContainer.innerHTML = "";
+	for (let i = 0; i < daStampare.length; i++) {
+		const category = daStampare[i];
+		stampaCategoria(iconeRaggrupate[category], category);
+
+	}
+}
+
+stampaMultipleCategorie("animal", "vegetable", "user");
+// creo una funzione per stampare in base al select del html
+// uso iconaRaggrupate
+function stampaPerSelect(listaDiGruppi) {
+	let namesList = [];
+	for (const key in listaDiGruppi) {
+		namesList.push(key);
+	}
+	console.log(namesList);
+	return namesList;
+}
+stampaPerSelect(iconeRaggrupate);
+
+function creaHtmlOptions(gruppi) {
+	for (let i = 0; i < gruppi.length; i++) {
+		const nomeGruppo = gruppi[i];
+		selectFiltro.innerHTML += `<option value='${nomeGruppo}'>${nomeGruppo}</option>`;
+	}
+}
+
+const listaGruppi = stampaPerSelect(iconeRaggrupate);
+creaHtmlOptions(listaGruppi);
+
+
+selectFiltro.addEventListener("change", function () {
+	const value = this.value;
+	if (value === "all") {
+		stampaMultipleCategorie(...listaGruppi);
+	} else {
+		stampaMultipleCategorie(value);
+	}
+});
